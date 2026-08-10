@@ -1,0 +1,11 @@
+field,definition
+forecast_2w_demand,Two-week top-down SKU demand forecast
+projected_2w_production,Recent 8-week average production scaled to two weeks; proxy only
+projected_2w_delivery,Recent 8-week average delivery scaled to two weeks; proxy only
+forecast_production_gap,Forecast demand minus projected production; positive indicates shortfall risk
+forecast_delivery_gap,Forecast demand minus projected delivery; positive indicates delivery risk
+forecast_production_gap_pct,Production gap divided by forecast demand
+recent_delivery_to_demand_ratio,Recent 8-week delivery divided by sales orders
+risk_level,High/Medium/Low proxy risk classification
+risk_rank,"Numeric sort order: High=3, Medium=2, Low=1"
+risk_reason,Human-readable explanation for the risk flag
