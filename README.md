@@ -29,21 +29,21 @@ Flows used: sales orders (distributor demand), production volume, factory issue 
 
 What the data does not contain, which constrains everything downstream: beginning inventory, true production capacity, and order-level backlog. Every "risk" number in this project is therefore a planning proxy, not a stockout probability. This is stated again wherever it matters.
 
-Pipeline
-01_data_audit.ipynb — consolidation and audit
+**Pipeline**
+**01_data_audit.ipynb — consolidation and audit**
 
 The four temporal files arrive in wide format (one column per SKU). Each is melted to long, joined on Date × product_id, and merged against the node table to attach Group and Sub-Group. Includes a duplicate-SKU-column fix and an explicit check that every product resolves to a group.
 
 Audit output: row count, product count, date span, duplicate keys, null counts. → data/processed/daily_flow.csv
 
-02_weekly_KPI.ipynb — weekly KPIs and demand profiling
+**02_weekly_KPI.ipynb — weekly KPIs and demand profiling**
 
 Rolls the daily panel to product-weeks and computes the gaps that matter operationally:
 
-Metric	Definition
-demand_production_gap	orders − production
-demand_delivery_gap	orders − delivery
-factory_delivery_gap	factory issue − delivery
+Metric	                  Definition
+demand_production_gap	      orders − production
+demand_delivery_gap	      orders − delivery
+factory_delivery_gap	      factory issue − delivery
 production_to_demand_ratio	production ÷ orders
 delivery_to_demand_ratio	delivery ÷ orders
 
@@ -53,7 +53,7 @@ Also profiles each SKU on total demand, mean, standard deviation, coefficient of
 
 → weekly_product_flow.csv, product_risk_current.csv
 
-03_demand_forecasting.ipynb — daily SKU baseline
+**03_demand_forecasting.ipynb — daily SKU baseline**
 
 A first pass: 28-day holdout, three naive models (seasonal_naive_7, moving_average_7, moving_average_28), per-SKU model selection on WAPE, 14-day forward forecast.
 
@@ -64,7 +64,7 @@ Forecasting intermittent daily SKU demand directly is fighting the noise rather 
 
 Both are addressed in 04.
 
-04_hierarchical_forecasting.ipynb — the adopted method
+**04_hierarchical_forecasting.ipynb — the adopted method**
 
 Forecast at the Sub-Group level, where demand aggregates into something stable, then allocate back down to SKUs.
 
@@ -79,16 +79,14 @@ Reported: Sub-Group WAPE and bias, reconciled SKU-level WAPE and bias. Bias conv
 
 → forecast_2w_topdown.csv, hierarchical_model_performance.csv, hierarchical_sku_backtest.csv, hierarchical_backtest_summary.csv
 
-05_forecast_granularity_comparison.ipynb — the control group
+**05_forecast_granularity_comparison.ipynb — the control group**
 
-04 claims top-down is better. This notebook is what makes that claim testable. Three approaches, same four-week window, same SKU-week evaluation grain, same pooled WAPE:
+This notebook is what makes that claim testable. Three approaches, same four-week window, same SKU-week evaluation grain, same pooled WAPE:
 
-Approach	Model	Pooled WAPE	Bias
-Daily × SKU direct → aggregated to SKU-week	seasonal_naive_7	[fill]	[fill]
-Weekly × SKU direct	moving_average_8	[fill]	[fill]
-Weekly × Sub-Group → allocated to SKU	moving_average_8 + 80/20 shares	[fill]	[fill]
-
-(Fill from forecast_granularity_comparison.csv.)
+Approach	                                    Model	                             Pooled WAPE	       Bias	            Accuracy
+Daily × SKU direct → aggregated to SKU-week	seasonal_naive_7	                  0.331	             +22.1%	      66.9%
+**Weekly × SKU direct	                        moving_average_8	                  0.238	             −3.1%	      76.2%**
+Weekly × Sub-Group → allocated to SKU	      moving_average_8 + 80/20 shares	0.237	             −3.1%	      76.3%
 
 A metric note is written out alongside the comparison: the earlier daily-SKU median WAPE (~0.66) is not comparable to pooled WAPE and is reported separately so the two are never conflated. Pooled WAPE weights by volume; median WAPE weights every SKU equally, including near-zero ones. Reporting one and calling it the other is the most common way forecast accuracy gets overstated.
 
@@ -106,14 +104,16 @@ Ships with a field dictionary CSV defining each column, and validates row count,
 
 → forecast_risk_topdown.csv, forecast_risk_field_dictionary.csv
 
-Dashboard
+**Dashboard**
 
 Two-page Power BI report:
 
 Executive Overview — weekly demand / production / delivery trend, gap KPIs, risk counts by tier, top chronic-gap SKUs.
 Product Detail — per-SKU history, forecast, allocation share, risk tier and reason.
 
-Show Image Show Image
+<img width="2714" height="1535" alt="image" src="https://github.com/user-attachments/assets/f655d25b-7176-4f8d-8e2a-5e83acd4f8ac" />
+<img width="2762" height="1492" alt="image" src="https://github.com/user-attachments/assets/ade4e055-4067-45b1-9309-b375571a5e8f" />
+
 
 Design decisions worth stating
 
