@@ -1,0 +1,23 @@
+# Source dataset is downloaded separately; see README.md.
+Data/raw/
+
+# Large intermediate tables reconstructed from the source data.
+Data/processed/daily_flow.csv
+Data/processed/weekly_product_flow.csv
+
+# Python and Jupyter
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Local configuration
+.env
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
